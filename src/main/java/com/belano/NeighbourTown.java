@@ -1,5 +1,7 @@
 package com.belano;
 
+import java.util.Objects;
+
 /**
  * Stores town key and weight (distance)
  */
@@ -19,6 +21,11 @@ public class NeighbourTown {
 
 	public int getDistance() {
 		return distance;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(key, distance);
 	}
 
 	@Override

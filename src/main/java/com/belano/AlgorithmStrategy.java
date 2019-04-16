@@ -5,6 +5,6 @@ package com.belano;
  */
 public interface AlgorithmStrategy {
 
-	public int calculate(String textRoute);
+	int calculate(String textRoute);
 
 }

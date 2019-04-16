@@ -4,32 +4,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Map;
 import java.util.StringTokenizer;
 
 /**
  * Distance calculator
  */
 public class DistanceCalculator {
-	final static Logger logger = LoggerFactory.getLogger(DistanceCalculator.class);
+	private static final Logger logger = LoggerFactory.getLogger(DistanceCalculator.class);
 
-	public final static String searchRouteRegex = "^([ABCDE])(-[ABCDE])+$";
+	public static final String SEARCH_ROUTE_REGEX = "^([ABCDE])(-[ABCDE])+$";
 
-	/** pseudo adjacency list based on a map implementation */
-	private static Map<TownKey, List<NeighbourTown>> adjList;
 
 	/** distance calculator algorithm strategy **/
 	private AlgorithmStrategy algorithmStrategy;
 
 	public DistanceCalculator(
-			Map<TownKey, List<NeighbourTown>> adjList) {
-		this.adjList = adjList;
-		this.algorithmStrategy = new IterativeStrategy();	// default
+			AdjacencyList adjList) {
+		this.algorithmStrategy = new IterativeStrategy(adjList);	// default
 	}
 
-	public DistanceCalculator(
-			Map<TownKey, List<NeighbourTown>> adjList, AlgorithmStrategy strategy) {
-		this.adjList = adjList;
+	public DistanceCalculator(AlgorithmStrategy strategy) {
 		this.algorithmStrategy = strategy;
 	}
 
@@ -53,12 +47,20 @@ public class DistanceCalculator {
 
 	static class RecursiveStrategy implements AlgorithmStrategy {
 
+		private AdjacencyList adjList;
+
+		public RecursiveStrategy(AdjacencyList adjList) {
+			this.adjList = adjList;
+		}
+
 		@Override public int calculate(String textRoute) {
-			if (!textRoute.matches(searchRouteRegex)) {
+			if (!textRoute.matches(SEARCH_ROUTE_REGEX)) {
 				throw new InvalidRouteException("Invalid route: [" + textRoute + "]");
 			}
 			String[] route = textRoute.split("-");
-			int acc = 0, i = 0, j = 1;
+			int acc = 0;
+			int i = 0;
+			int j = 1;
 			return calculateAcc(route, acc, i, j);
 		}
 
@@ -66,38 +68,44 @@ public class DistanceCalculator {
 			if (route.length == j) {
 				return acc;
 			}
-			TownKey current = TownKey.convert(route[i]);
-			TownKey target = TownKey.convert(route[j]);
-			List<NeighbourTown> adj = adjList.get(current);
-			for (NeighbourTown neighbourTown : adj) {
-				if (neighbourTown.getKey().equals(target)) {
+			TownKey currentTown = TownKey.convert(route[i]);
+			TownKey targetTown = TownKey.convert(route[j]);
+			List<NeighbourTown> neighbourTowns = adjList.get(currentTown);
+			for (NeighbourTown neighbourTown : neighbourTowns) {
+				if (neighbourTown.getKey().equals(targetTown)) {
 					logger.debug("i {} j {} total {} distance {}",
 							i, j, acc, neighbourTown.getDistance());
 					return calculateAcc(route, acc + neighbourTown.getDistance(), ++i,
 							++j);
 				}
 			}
-			logger.debug("no route found from {} to {}, returning 0", current, target);
+			logger.debug("no route found from {} to {}, returning 0", currentTown, targetTown);
 			return 0;
 		}
 	}
 
 	static class IterativeStrategy implements AlgorithmStrategy {
 
+		private AdjacencyList adjList;
+
+		public IterativeStrategy(AdjacencyList adjList) {
+			this.adjList = adjList;
+		}
+
 		@Override public int calculate(String textRoute) {
-			if (!textRoute.matches(searchRouteRegex)) {
+			if (!textRoute.matches(SEARCH_ROUTE_REGEX)) {
 				throw new InvalidRouteException("Invalid route: [" + textRoute + "]");
 			}
 			int totalDistance = 0;
 			StringTokenizer st = new StringTokenizer(textRoute, "-");
-			TownKey current = TownKey.convert(st.nextToken());
+			TownKey currentTown = TownKey.convert(st.nextToken());
 			while (st.hasMoreTokens()) {
-				List<NeighbourTown> adj = adjList.get(current);
-				TownKey target = TownKey.convert(st.nextToken());
+				List<NeighbourTown> neighbourTowns = adjList.get(currentTown);
+				TownKey targetTown = TownKey.convert(st.nextToken());
 				boolean found = false;
-				for (NeighbourTown neighbourTown : adj) {
-					if (neighbourTown.getKey().equals(target)) {
-						logger.debug("Adding {} to current total distance {}",
+				for (NeighbourTown neighbourTown : neighbourTowns) {
+					if (neighbourTown.getKey().equals(targetTown)) {
+						logger.debug("Adding {} to currentTown total distance {}",
 								neighbourTown.getDistance(), totalDistance);
 						totalDistance += neighbourTown.getDistance();
 						found = true;
@@ -105,10 +113,10 @@ public class DistanceCalculator {
 					}
 				}
 				if (!found) {
-					logger.debug("no route found from {} to {}, returning 0", current, target);
+					logger.debug("no route found from {} to {}, returning 0", currentTown, targetTown);
 					return 0;
 				}
-				current = target;
+				currentTown = targetTown;
 			}
 			return totalDistance;
 		}

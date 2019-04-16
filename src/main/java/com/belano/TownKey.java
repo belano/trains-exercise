@@ -1,5 +1,7 @@
 package com.belano;
 
+import java.util.Arrays;
+
 /**
  * Holds town key constants
  */
@@ -7,12 +9,7 @@ public enum TownKey {
 	A, B, C, D, E;
 
 	public static boolean isKeyValid(String key) {
-		for (TownKey k : TownKey.values()) {
-			if (k.name().equals(key)) {
-				return true;
-			}
-		}
-		return false;
+		return Arrays.stream(TownKey.values()).anyMatch(k -> k.name().equals(key));
 	}
 
 	public static TownKey convert(String key) {

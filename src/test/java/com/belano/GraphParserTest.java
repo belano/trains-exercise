@@ -35,7 +35,7 @@ public class GraphParserTest {
 		);
 
 		// act
-		Map<TownKey, List<NeighbourTown>> townKeyListMap = parser.parse(graph);
+		AdjacencyList townKeyListMap = parser.parse(graph);
 
 		// assert
 		assertThat("Neighbour towns do not match", townKeyListMap.get(TownKey.A),

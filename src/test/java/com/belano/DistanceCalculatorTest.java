@@ -3,9 +3,6 @@ package com.belano;
 import org.junit.Test;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -16,6 +13,8 @@ import static org.mockito.Mockito.verify;
  * Unit test for {@link com.belano.DistanceCalculator} class
  */
 public class DistanceCalculatorTest {
+
+	private static final String UNEXPECTED_DISTANCE = "Unexpected distance";
 
 	@Test
 	public void shouldParseGraphUponConstruction() {
@@ -33,9 +32,7 @@ public class DistanceCalculatorTest {
 	@Test
 	public void shouldCalculateDistanceIterative() {
 		// given
-		Map<TownKey, List<NeighbourTown>> adjList =
-				new HashMap<TownKey, List<NeighbourTown>>();
-
+		AdjacencyList adjList = new AdjacencyList();
 		adjList.put(TownKey.A, Arrays.asList(
 				new NeighbourTown(TownKey.B, 5),
 				new NeighbourTown(TownKey.D, 5),
@@ -62,19 +59,17 @@ public class DistanceCalculatorTest {
 
 		DistanceCalculator calculator = new DistanceCalculator(adjList);
 
-		assertThat("Unexpected distance", calculator.getDistance("A-B-C"), is(9));
-		assertThat("Unexpected distance", calculator.getDistance("A-D"), is(5));
-		assertThat("Unexpected distance", calculator.getDistance("A-D-C"), is(13));
-		assertThat("Unexpected distance", calculator.getDistance("A-E-B-C-D"), is(22));
-		assertThat("Unexpected distance", calculator.getDistance("A-E-D"), is(0));
+		assertThat(UNEXPECTED_DISTANCE, calculator.getDistance("A-B-C"), is(9));
+		assertThat(UNEXPECTED_DISTANCE, calculator.getDistance("A-D"), is(5));
+		assertThat(UNEXPECTED_DISTANCE, calculator.getDistance("A-D-C"), is(13));
+		assertThat(UNEXPECTED_DISTANCE, calculator.getDistance("A-E-B-C-D"), is(22));
+		assertThat(UNEXPECTED_DISTANCE, calculator.getDistance("A-E-D"), is(0));
 	}
 
 	@Test
 	public void shouldCalculateDistanceRecursive() {
 		// given
-		Map<TownKey, List<NeighbourTown>> adjList =
-				new HashMap<TownKey, List<NeighbourTown>>();
-
+		AdjacencyList adjList = new AdjacencyList();
 		adjList.put(TownKey.A, Arrays.asList(
 				new NeighbourTown(TownKey.B, 5),
 				new NeighbourTown(TownKey.D, 5),
@@ -99,14 +94,13 @@ public class DistanceCalculatorTest {
 				new NeighbourTown(TownKey.B, 3)
 		));
 
-		DistanceCalculator calculator = new DistanceCalculator(adjList,
-				new DistanceCalculator.RecursiveStrategy());
+		DistanceCalculator calculator = new DistanceCalculator(new DistanceCalculator.RecursiveStrategy(adjList));
 
-		assertThat("Unexpected distance", calculator.getDistance("A-B-C"), is(9));
-		assertThat("Unexpected distance", calculator.getDistance("A-D"), is(5));
-		assertThat("Unexpected distance", calculator.getDistance("A-D-C"), is(13));
-		assertThat("Unexpected distance", calculator.getDistance("A-E-B-C-D"), is(22));
-		assertThat("Unexpected distance", calculator.getDistance("A-E-D"), is(0));
+		assertThat(UNEXPECTED_DISTANCE, calculator.getDistance("A-B-C"), is(9));
+		assertThat(UNEXPECTED_DISTANCE, calculator.getDistance("A-D"), is(5));
+		assertThat(UNEXPECTED_DISTANCE, calculator.getDistance("A-D-C"), is(13));
+		assertThat(UNEXPECTED_DISTANCE, calculator.getDistance("A-E-B-C-D"), is(22));
+		assertThat(UNEXPECTED_DISTANCE, calculator.getDistance("A-E-D"), is(0));
 	}
 
 }

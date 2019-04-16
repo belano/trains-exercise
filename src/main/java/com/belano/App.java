@@ -40,7 +40,7 @@ public class App
 				if ("done".equalsIgnoreCase(route)) {
 					break;
 				}
-				if (!route.matches(DistanceCalculator.searchRouteRegex)) {
+				if (!route.matches(DistanceCalculator.SEARCH_ROUTE_REGEX)) {
 					System.out.println("Invalid route, try again");
 					continue;
 				}
@@ -53,7 +53,6 @@ public class App
 				}
 			} catch (Exception e) {
 				System.out.println("Could not calculate distance due to: " + e.getMessage());
-				continue;
 			}
 		}
 
@@ -62,7 +61,7 @@ public class App
     }
 
 	private static List<String> getGraphDefinition(String prompt) {
-		List<String> parts = new ArrayList<String>();
+		List<String> parts = new ArrayList<>();
 		Scanner input = new Scanner(System.in);
 		while(true) {
 			System.out.print(prompt);
@@ -70,7 +69,7 @@ public class App
 			if ("done".equalsIgnoreCase(part)) {
 				break;
 			}
-			if (!part.matches(GraphParser.routeRegex)) {
+			if (!part.matches(GraphParser.ROUTE_REGEX)) {
 				System.out.println("Invalid route, try again");
 				continue;
 			}
